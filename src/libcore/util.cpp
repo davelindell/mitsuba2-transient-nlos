@@ -154,7 +154,7 @@ void trap_debugger() {
         return;
 
 #if defined(__LINUX__) || defined(__OSX__)
-    #if defined(__i386__) || defined(__x86_64__) || defined(__OSX__)
+    #if defined(__i386__) || defined(__x86_64__) || (defined(__OSX__) && !defined(__arm64__))
         __asm__ ("int $3");
     #else
         __builtin_trap();

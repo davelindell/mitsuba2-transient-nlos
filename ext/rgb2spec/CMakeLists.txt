@@ -18,31 +18,31 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|Intel")
 endif()
 
 
-if (TARGET tbb)
-  add_definitions(-DRGB2SPEC_USE_TBB=1)
-  include_directories(${TBB_INCLUDE_DIRS})
-else ()
-  include(FindOpenMP)
-  if(OPENMP_FOUND)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-  endif()
-endif()
+# if (TARGET tbb)
+#   add_definitions(-DRGB2SPEC_USE_TBB=1)
+#   include_directories(${TBB_INCLUDE_DIRS})
+# else ()
+#   include(FindOpenMP)
+#   if(OPENMP_FOUND)
+#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+#     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+#   endif()
+# endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_executable(rgb2spec_opt rgb2spec_opt.cpp)
 add_library(rgb2spec STATIC rgb2spec.c)
 
-if (TARGET tbb)
-  target_link_libraries(rgb2spec_opt PRIVATE tbb)
-
-  add_custom_command(TARGET rgb2spec_opt POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      $<TARGET_FILE:tbb>
-      $<TARGET_FILE_DIR:rgb2spec_opt>
-  )
-endif()
+# if (TARGET tbb)
+#   target_link_libraries(rgb2spec_opt PRIVATE tbb)
+# 
+#   add_custom_command(TARGET rgb2spec_opt POST_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#       $<TARGET_FILE:tbb>
+#       $<TARGET_FILE_DIR:rgb2spec_opt>
+#   )
+# endif()
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/srgb.coeff

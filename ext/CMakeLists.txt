@@ -235,6 +235,11 @@ if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64|AMD64")
   if (MSVC)
     target_compile_options(asmjit PRIVATE "/wd4804" "/wd4838")
   endif()
+elseif (${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm64")
+    set(ASMJIT_BUILD_ARM TRUE)
+    add_subdirectory(asmjit)
+    set(ASMJIT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/asmjit/src PARENT_SCOPE)
+    set_property(TARGET asmjit PROPERTY FOLDER "dependencies")
 endif()
 
 # Disable annoying MSVC warnings in rgb2spec build
