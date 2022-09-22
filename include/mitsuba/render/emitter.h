@@ -5,6 +5,7 @@
 #include <mitsuba/render/endpoint.h>
 #include <mitsuba/render/fwd.h>
 
+
 NAMESPACE_BEGIN(mitsuba)
 
 
@@ -69,7 +70,6 @@ public:
 
     /// Flags for all components combined.
     uint32_t flags(mask_t<Float> /*active*/ = true) const { return m_flags; }
-
 
     ENOKI_CALL_SUPPORT_FRIEND()
     MTS_DECLARE_CLASS()

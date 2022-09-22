@@ -109,6 +109,13 @@ public:
                              bool test_visibility = true,
                              Mask active = true) const;
 
+    std::pair<DirectionSample3f, Spectrum>
+    sample_emitter_direction_confocal(const Interaction3f &ref,
+                             const Point2f &sample,
+                             const Interaction3f &first_it,
+                             bool test_visibility = true,
+                             Mask active = true) const;
+
     /**
      * \brief Evaluate the probability density of the  \ref
      * sample_emitter_direct() technique given an filled-in \ref

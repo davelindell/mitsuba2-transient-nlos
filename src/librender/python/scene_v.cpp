@@ -57,6 +57,9 @@ MTS_PY_EXPORT(Scene) {
         .def("sample_emitter_direction",
             vectorize(&Scene::sample_emitter_direction),
             "ref"_a, "sample"_a, "test_visibility"_a = true, "mask"_a = true)
+        .def("sample_emitter_direction",
+             vectorize(&Scene::sample_emitter_direction_confocal),
+             "ref"_a, "sample"_a, "first_si"_a, "test_visibility"_a = true, "mask"_a = true)
         .def("pdf_emitter_direction",
             vectorize(&Scene::pdf_emitter_direction),
             "ref"_a, "ds"_a, "active"_a = true)

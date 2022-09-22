@@ -7,6 +7,7 @@
 #include <mitsuba/render/records.h>
 #include <mitsuba/render/transientintegrator.h>
 #include <random>
+#include <iostream>
 
 NAMESPACE_BEGIN(mitsuba)
 
@@ -33,6 +34,7 @@ public:
         m_nlos_hidden_geometry_sampling_includes_relay_wall =
             props.bool_("nlos_hidden_geometry_sampling_includes_relay_wall", true) &&
             m_nlos_hidden_geometry_sampling;
+        m_is_confocal = props.bool_("confocal", false);
     }
 
     void emitter_nee_sample(
@@ -40,10 +42,26 @@ public:
         SurfaceInteraction3f &si, Mask &active_e,
         std::vector<RadianceSample<Float, Spectrum>> &timed_samples_record,
         const BSDFPtr &bsdf, const Spectrum &throughput, const Float &path_opl,
-        const Float &current_ior, const int &depth) const {
-        auto [ds, emitter_val] = scene->sample_emitter_direction(
-            si, sampler->next_2d(active_e), true, active_e);
-        active_e &= neq(ds.pdf, 0.f);
+        const Float &current_ior, const int &depth, SurfaceInteraction3f &first_si) const {
+
+
+        DirectionSample3f ds;
+        Spectrum emitter_val;
+
+        if (m_is_confocal) {
+            auto [ds_tmp, emitter_val_tmp] = scene->sample_emitter_direction_confocal(
+                    si, sampler->next_2d(active_e), first_si, true, active_e);
+            active_e &= neq(ds.pdf, 0.f);
+            ds = ds_tmp;
+            emitter_val = emitter_val_tmp;
+        }
+        else {
+            auto [ds_tmp, emitter_val_tmp] = scene->sample_emitter_direction(
+                    si, sampler->next_2d(active_e), true, active_e);
+            active_e &= neq(ds.pdf, 0.f);
+            ds = ds_tmp;
+            emitter_val = emitter_val_tmp;
+        }
 
         // Query the BSDF for that emitter-sampled direction
         Vector3f wo       = si.to_local(ds.d);
@@ -72,7 +90,8 @@ public:
         SurfaceInteraction3f &si, Mask &active_e,
         std::vector<RadianceSample<Float, Spectrum>> &timed_samples_record,
         const BSDFPtr &bsdf, const Spectrum &throughput, const Float &path_opl,
-        const Float &current_ior, const int &depth) const {
+        const Float &current_ior, const int &depth, const Point3f &laser_target,
+        SurfaceInteraction3f &first_si) const {
         // nlos scenes only have one laser emitter - standard
         // emitter sampling techniques do not apply as most
         // directions do not emit any radiance, it needs to be very
@@ -85,7 +104,12 @@ public:
 
         // 1. Obtain direction to NLOS illuminated point
         //    and test visibility with ray_test
-        Vector3f d = m_nlos_laser_target - si.p;
+        Vector3f d = laser_target - si.p;
+
+        // std::cout << m_nlos_laser_taret << std::endl;
+        // std::cout << d << std::endl;
+        // exit(0);
+
         Float dist = norm(d);
         d /= dist;
         Ray3f ray_bsdf(
@@ -128,7 +152,7 @@ public:
                 emitter_nee_sample(
                     scene, sampler, ctx, si_bsdf, active_e,
                     timed_samples_record, bsdf_next, throughput * bsdf_val,
-                    path_opl + dist * current_ior, current_ior, depth + 1);
+                    path_opl + dist * current_ior, current_ior, depth + 1, first_si);
             }
         }
     }
@@ -217,12 +241,25 @@ public:
 
         SurfaceInteraction3f si = scene->ray_intersect(ray, active);
         EmitterPtr emitter      = si.emitter(scene);
+        SurfaceInteraction3f first_si = si;
 
         if (unlikely((!is_cuda_array_v<Float> || m_max_depth < 0) &&
                      none(active))) {
             return;
         }
 
+        Point3f laser_target;
+        if (m_is_confocal) {
+            //laser_target = m_nlos_laser_target;
+            laser_target = si.p;
+            //emitter->set_transform(si.p);
+            //laser_target = Point3f(1.0, 1.0, 0.0);
+            //std::cout << laser_target << std::endl;
+        }
+        else {
+            laser_target = m_nlos_laser_target;
+        }
+        // std::cout << laser_target << std::endl;
         for (int depth = 1;; ++depth) {
 
             path_opl += si.distance(ray) * current_ior;
@@ -266,12 +303,12 @@ public:
                     // laser sampling (nee modified for nlos scenes)
                     emitter_laser_sample(scene, sampler, ctx, si, active_e,
                                          timed_samples_record, bsdf, throughput,
-                                         path_opl, current_ior, depth);
+                                         path_opl, current_ior, depth, laser_target, first_si);
                 } else {
                     // standard nee
                     emitter_nee_sample(scene, sampler, ctx, si, active_e,
                                        timed_samples_record, bsdf, throughput,
-                                       path_opl, current_ior, depth);
+                                       path_opl, current_ior, depth, first_si);
                 }
             }
 
@@ -364,7 +401,10 @@ protected:
     void prepare_integrator(const Scene* scene) override {
         if (m_nlos_laser_sampling) {
             auto emitters = scene->emitters();
-            Assert(emitters[0]->world_transform()->size() == 1);
+            //std::cout << emitters[0]->world_transform()->size() << std::endl;
+            //std::cout << emitters[0]->world_transform() << std::endl;
+
+            Assert(emitters[0]->world_transform()->size() <= 1);
             if (unlikely(emitters.size() != 1)) {
                 Throw("NLOS laser sampling is not implemented for scenes "
                       "with more than one emitter.");
@@ -394,7 +434,8 @@ private:
     bool m_nlos_laser_sampling,
         m_nlos_hidden_geometry_sampling,
         m_nlos_hidden_geometry_sampling_do_mis,
-        m_nlos_hidden_geometry_sampling_includes_relay_wall;
+        m_nlos_hidden_geometry_sampling_includes_relay_wall,
+        m_is_confocal;
     Point3f m_nlos_laser_target;
 };
 
