@@ -15,20 +15,20 @@
         <string name="fov_axis" value="smaller"/>
         <float name="near_clip" value="1"/>
         <float name="far_clip" value="1200"/>
-        <float name="fov" value="120"/>
+        <float name="fov" value="70"/>
         <transform name="to_world">
-            <lookat origin="0, 0, 10"
+            <lookat origin="0, 0, 20"
                     target="0, 0, 0"
                     up    ="  0,   1,    0"/>
         </transform>
         <sampler type="independent">  <!-- ldsampler -->
-            <integer name="sample_count" value="1024"/>
+            <integer name="sample_count" value="4096"/>
         </sampler>
         <film type="streakhdrfilm" name="streakfilm">
-            <integer name="width" value="128"/>
-            <integer name="height" value="128"/>
+            <integer name="width" value="64"/>
+            <integer name="height" value="64"/>
             <integer name="time" value="400"/>
-            <float name="exposure_time" value="1"/>
+            <float name="exposure_time" value="0.5"/>
             <float name="time_offset" value="0"/>
             <rfilter name="rfilter" type="gaussian"/>
             <rfilter name="tfilter" type="gaussian"/>
