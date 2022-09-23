@@ -4,6 +4,7 @@
 #include <mitsuba/core/vector.h>
 #include <mitsuba/core/properties.h>
 #include <mitsuba/core/rfilter.h>
+#include <hdf5.h>
 
 NAMESPACE_BEGIN(mitsuba)
 
@@ -102,6 +103,16 @@ public:
          * </ul>
          */
         RGBE,
+
+        /**
+         * \brief HDF5 image format
+         *
+         * The following is supported
+         * <ul>
+         *   <li>Saving of \ref Float32 - based Luminance or RGB bitmaps</li>
+         * </ul>
+         */
+        HDF5,
 
         /**
          * \brief PFM (Portable Float Map) image format

@@ -102,6 +102,9 @@ public:
         m_sample_to_camera = m_camera_to_sample.inverse();
 
         m_flags = +EmitterFlags::DeltaPosition;
+
+        m_world_transform = props.animated_transform("to_world", ScalarTransform4f()).get();
+
     }
 
     Float pdf_direction(const Interaction3f &, const DirectionSample3f &,
@@ -151,6 +154,18 @@ public:
             ray, unpolarized<Spectrum>(weight / pdf) & active);
     }
 
+    /*
+    void set_transform(const Interaction3f &it) {
+        Transform4f trafo = m_world_transform->eval(it.time, true);
+
+        Point3f origin = trafo.translation();
+        Point3f target = it.p;
+        Vector3f up = Vector3f(0., 1., 0.); // just hack this in, not sure how to get this from the xml file
+        trafo = Transform4f::look_at(origin, target, up);
+        m_trafo = trafo;
+    }
+    */
+
     std::pair<DirectionSample3f, Spectrum>
     sample_direction(const Interaction3f &it, const Point2f & /*sample*/,
                      Mask active) const override {
@@ -158,6 +173,70 @@ public:
 
         // 1. Transform the reference point into the local coordinate system
         Transform4f trafo = m_world_transform->eval(it.time, active);
+
+        // for confocal samples, we should adjust the coordinate system
+        // so that it points towards the interaction point
+        // basically we just need to change the lookat vector, which is just the rotation matrix?
+/*        if (m_is_confocal) {
+            Point3f origin = trafo.translation();
+            Point3f target = it.p;
+            Vector3f up = Vector3f(0., 1., 0.); // just hack this in, not sure how to get this from the xml file
+            trafo = Transform4f::look_at(origin, target, up);
+            //std::cout << it.p << std::endl;
+            // std::cout << trafo << std::endl << std::endl;
+        }*/
+
+        Point it_local = trafo.inverse().transform_affine(it.p);
+
+        // 2. Map to UV coordinates
+        Point2f uv = head<2>(m_camera_to_sample * it_local);
+        active &= all(uv >= 0 && uv <= 1) && it_local.z() > 0;
+
+        // 3. Query texture
+        SurfaceInteraction3f it_query = zero<SurfaceInteraction3f>();
+        it_query.wavelengths = it.wavelengths;
+        it_query.uv = uv;
+        UnpolarizedSpectrum spec = m_irradiance->eval(it_query, active);
+
+        // 4. Prepare DirectionSample record for caller (MIS, etc.)
+        DirectionSample3f ds;
+        ds.p = trafo.translation();
+        ds.n = trafo * ScalarVector3f(0, 0, 1);
+        ds.uv = uv;
+        ds.time = it.time;
+        ds.pdf = 1.f;
+        ds.delta = true;
+        ds.object   = this;
+
+        ds.d = ds.p - it.p;
+        Float dist_squared = squared_norm(ds.d);
+        ds.dist = sqrt(dist_squared);
+        ds.d *= rcp(ds.dist);
+
+        // Scale so that irradiance at z=1 is correct
+        spec *= math::Pi<Float> * m_intensity->eval(it_query, active) *
+                sqr(rcp(it_local.z())) / -dot(ds.n, ds.d);
+
+        return { ds, unpolarized<Spectrum>(spec & active) };
+    }
+
+    std::pair<DirectionSample3f, Spectrum>
+    sample_direction_confocal(const Interaction3f &it, const Point2f & /*sample*/,
+                              const Interaction3f &first_it,
+                              Mask active) const {
+        MTS_MASKED_FUNCTION(ProfilerPhase::EndpointSampleDirection, active);
+
+        // 1. Transform the reference point into the local coordinate system
+        Transform4f trafo = m_world_transform->eval(it.time, active);
+
+        // for confocal samples, we should adjust the coordinate system
+        // so that it points towards the interaction point
+        // basically we just need to change the lookat vector, which is just the rotation matrix?
+        Point3f origin = trafo.translation();
+        Point3f target = first_it.p;
+        Vector3f up = Vector3f(0., 1., 0.); // just hack this in, not sure how to get this from the xml file
+        trafo = Transform4f::look_at(origin, target, up);
+
         Point it_local = trafo.inverse().transform_affine(it.p);
 
         // 2. Map to UV coordinates

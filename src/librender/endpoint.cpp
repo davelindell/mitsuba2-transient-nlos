@@ -53,6 +53,14 @@ Endpoint<Float, Spectrum>::sample_direction(const Interaction3f & /*it*/,
     NotImplementedError("sample_direction");
 }
 
+MTS_VARIANT std::pair<typename Endpoint<Float, Spectrum>::DirectionSample3f, Spectrum>
+Endpoint<Float, Spectrum>::sample_direction_confocal(const Interaction3f & /*it*/,
+                                            const Point2f & /*sample*/,
+                                            const Interaction3f &first_si,
+                                            Mask /*active*/) const {
+    NotImplementedError("sample_direction");
+}
+
 MTS_VARIANT Float Endpoint<Float, Spectrum>::pdf_direction(const Interaction3f & /*it*/,
                                                            const DirectionSample3f & /*ds*/,
                                                            Mask /*active*/) const {
@@ -65,6 +73,8 @@ MTS_VARIANT Spectrum Endpoint<Float, Spectrum>::eval(const SurfaceInteraction3f 
 }
 
 MTS_VARIANT std::string Endpoint<Float, Spectrum>::id() const { return m_id; }
+
+MTS_VARIANT void Endpoint<Float, Spectrum>::set_transform(const Interaction3f &it) { return; }
 
 MTS_IMPLEMENT_CLASS_VARIANT(Endpoint, Object)
 MTS_INSTANTIATE_CLASS(Endpoint)

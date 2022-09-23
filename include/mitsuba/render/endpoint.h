@@ -121,6 +121,12 @@ public:
                      const Point2f &sample,
                      Mask active = true) const;
 
+    virtual std::pair<DirectionSample3f, Spectrum>
+    sample_direction_confocal(const Interaction3f &ref,
+                              const Point2f &sample,
+                              const Interaction3f &first_si,
+                              Mask active = true) const;
+
     //! @}
     // =============================================================
 
@@ -221,6 +227,8 @@ public:
      * This function is invoked by the \ref Scene constructor.
      */
     virtual void set_scene(const Scene *scene);
+
+    void set_transform(const Interaction3f &it);
 
     /// Return a string identifier
     std::string id() const override;

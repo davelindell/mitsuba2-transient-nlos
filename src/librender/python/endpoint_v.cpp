@@ -16,6 +16,8 @@ MTS_PY_EXPORT(Endpoint) {
             D(Endpoint, sample_ray))
         .def("sample_direction", vectorize(&Endpoint::sample_direction),
             "it"_a, "sample"_a, "active"_a = true, D(Endpoint, sample_direction))
+        .def("sample_direction_confocal", vectorize(&Endpoint::sample_direction_confocal),
+             "it"_a, "sample"_a, "first_si"_a, "active"_a = true, D(Endpoint, sample_direction))
         .def("pdf_direction", vectorize(&Endpoint::pdf_direction),
             "it"_a, "ds"_a, "active"_a = true, D(Endpoint, pdf_direction))
         .def("eval", vectorize(&Endpoint::eval),

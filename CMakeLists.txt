@@ -3,6 +3,9 @@ cmake_minimum_required (VERSION 3.9.0)
 project(mitsuba)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/resources")
 
+# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/dist")
+
+
 # ---------- Setup mitsuba.conf ----------
 
 if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/mitsuba.conf)
@@ -221,12 +224,28 @@ endif()
 # Build the dependencies
 add_subdirectory(ext ext_build)
 
+# build hdf5
+# find_package(HDF5 REQUIRED COMPONENTS C CXX)
+# link_libraries(${HDF5_C_LIBRARIES} ${HDF5_CXX_LIBRARIES})
+link_directories(${CMAKE_CURRENT_BINARY_DIR}/ext_build/hdf5/bin)
+
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    link_libraries(hdf5_debug)
+else()
+    link_libraries(hdf5)
+endif()
+
+# set(MITSUBA_DIST ${MITSUBA_DIST} hdf5-static CACHE INTERNAL "")
+
+# add_dist(${CMAKE_CURRENT_BINARY_DIR}/ext_build/hdf5/bin/libhdf5)
+
 # Always add the include directories for tinyformat, Enoki and Eigen
 include_directories(include
   ${TINYFORMAT_INCLUDE_DIRS}
   ${EIGEN_INCLUDE_DIRS}
   ${ENOKI_INCLUDE_DIRS}
   ${TBB_INCLUDE_DIRS}
+  ${HDF5_INCLUDE_DIRS}
 )
 
 if (MTS_ENABLE_EMBREE)
