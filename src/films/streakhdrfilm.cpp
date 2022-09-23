@@ -76,7 +76,7 @@ public:
 
     StreakHDRFilm(const Properties &props) : Base(props) {
         std::string file_format = string::to_lower(
-            props.string("file_format", "openexr"));
+            props.string("file_format", "hdf5"));
         std::string pixel_format = string::to_lower(
             props.string("pixel_format", "rgba"));
         std::string component_format = string::to_lower(
@@ -86,6 +86,8 @@ public:
 
         if (file_format == "openexr" || file_format == "exr")
             m_file_format = Bitmap::FileFormat::OpenEXR;
+        else if (file_format == "hdf5")
+            m_file_format = Bitmap::FileFormat::HDF5;
         else if (file_format == "rgbe")
             m_file_format = Bitmap::FileFormat::RGBE;
         else if (file_format == "pfm")
@@ -400,34 +402,24 @@ public:
     };
 
     void write_hdf5() {
-        hid_t       file, filetype, memtype, space, dset;
+        hid_t       file, filetype, space, dset;
         herr_t      status;
         hsize_t dims[4] = {(uint) m_storage->size().x(), (uint) m_storage->size().y(), m_storage->time(), m_storage->channel_count()};
+        float arr[dims[0]][dims[1]][dims[2]][dims[3]];
+
+
 
         /*
          * Create a new file using the default properties.
          */
-        std::string filename_str = "data";
+        std::string filename_str = m_dest_file.replace_extension().string() + "/data.h5";
         file = H5Fcreate(filename_str.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-        /*
-         * Create array datatypes for file and memory.
-         */
-        filetype = H5Tarray_create (H5T_NATIVE_FLOAT, 4, dims);
-        memtype = H5Tarray_create (H5T_NATIVE_FLOAT, 4, dims);
-
-        /*
-         * Create dataspace.  Setting maximum size to NULL sets the maximum
-         * size to be the current size.
-         */
-        space = H5Screate_simple (4, dims, NULL);
-
-        /*
-         * Create the dataset and write the array data to it.
-         */
-        dset = H5Dcreate (file, "data", filetype, space, H5P_DEFAULT, H5P_DEFAULT,
-                          H5P_DEFAULT);
-        status = H5Dwrite (dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT,&m_storage->data());
+        space = H5Screate_simple(4, dims, NULL);
+        filetype = H5Tcopy(H5T_NATIVE_FLOAT);
+        dset = H5Dcreate(file, "data", filetype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        status = H5Dwrite(dset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
+                          H5P_DEFAULT, (void *) m_storage->data().managed().data());
 
         /*
          * Close and release resources.
@@ -435,7 +427,6 @@ public:
         status = H5Dclose (dset);
         status = H5Sclose (space);
         status = H5Tclose (filetype);
-        status = H5Tclose (memtype);
         status = H5Fclose (file);
 
     }
@@ -458,23 +449,21 @@ public:
         fs::create_directory(directoryname.replace_extension());
 
         if (m_file_format == Bitmap::FileFormat::HDF5) {
-
-
-            return;
+            write_hdf5();
         }
+        else {
+            for (int i = 0; i < m_size.y(); ++i) {
+                std::string filename_str = "frame_" + std::to_string(i);
+                fs::path filename = fs::path(filename_str);
+                std::string extension = string::to_lower(filename.extension().string());
+                if (extension != proper_extension)
+                    filename.replace_extension(proper_extension);
 
+                filename = directoryname / filename;
+                Log(Info, "\U00002714  Developing \"%s\" ..", filename.string());
 
-        for(int i = 0; i < m_size.y(); ++i) {
-            std::string filename_str = "frame_" + std::to_string(i);
-            fs::path filename = fs::path(filename_str);
-            std::string extension = string::to_lower(filename.extension().string());
-            if (extension != proper_extension)
-                filename.replace_extension(proper_extension);
-
-            filename = directoryname / filename;
-            Log(Info, "\U00002714  Developing \"%s\" ..", filename.string());
-
-            bitmap(i, false)->write(filename, m_file_format);
+                bitmap(i, false)->write(filename, m_file_format);
+            }
         }
     }
 

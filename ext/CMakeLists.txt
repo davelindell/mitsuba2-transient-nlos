@@ -243,10 +243,15 @@ elseif (${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm64")
 endif()
 
 # build HDF5
+add_subdirectory(hdf5)
 set(HDF5_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/hdf5/src
                       ${CMAKE_CURRENT_SOURCE_DIR}/hdf5/src/H5FDsubfiling
                       ${CMAKE_CURRENT_BINARY_DIR}/hdf5/src PARENT_SCOPE)
-add_subdirectory(hdf5)
+
+set_target_properties(hdf5-shared PROPERTIES LIBRARY_OUTPUT_DIRECTORY
+    ${CMAKE_BINARY_DIR}/dist)
+
+# set_property(TARGET hdf5-static hdf5-shared hdf5_tools-static hdf5_tools-shared hdf5_hl-static hdf5_hl-shared mirror_server mirror_server_stop h5diff h5diff-shared h5ls h5ls-shared h5debug h5repart h5mkgrp h5clear h5delete h5debug-shared h5repart-shared h5mkgrp-shared h5clear-shared h5delete-shared h5import h5import-shared h5repack h5repack-shared h5jam h5unjam h5jam-shared h5unjam-shared h5copy h5copy-shared h5stat h5stat-shared h5dump h5dump-shared h5format_convert h5format_convert-shared h5perf_serial gif2h5 gif2h5-shared h52gif h52gif-shared PROPERTY FOLDER "dependencies")
 
 # Disable annoying MSVC warnings in rgb2spec build
 if (MSVC)
