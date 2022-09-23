@@ -226,7 +226,12 @@ add_subdirectory(ext ext_build)
 # link_libraries(${HDF5_C_LIBRARIES} ${HDF5_CXX_LIBRARIES})
 
 link_directories(${CMAKE_CURRENT_BINARY_DIR}/ext_build/hdf5/bin)
-link_libraries(hdf5)
+
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    link_libraries(hdf5_debug)
+else()
+    link_libraries(hdf5)
+endif ()
 
 # Always add the include directories for tinyformat, Enoki and Eigen
 include_directories(include
