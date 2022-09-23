@@ -399,6 +399,47 @@ public:
         return target;
     };
 
+    void write_hdf5() {
+        hid_t       file, filetype, memtype, space, dset;
+        herr_t      status;
+        hsize_t dims[4] = {(uint) m_storage->size().x(), (uint) m_storage->size().y(), m_storage->time(), m_storage->channel_count()};
+
+        /*
+         * Create a new file using the default properties.
+         */
+        std::string filename_str = "data";
+        file = H5Fcreate(filename_str.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+        /*
+         * Create array datatypes for file and memory.
+         */
+        filetype = H5Tarray_create (H5T_NATIVE_FLOAT, 4, dims);
+        memtype = H5Tarray_create (H5T_NATIVE_FLOAT, 4, dims);
+
+        /*
+         * Create dataspace.  Setting maximum size to NULL sets the maximum
+         * size to be the current size.
+         */
+        space = H5Screate_simple (4, dims, NULL);
+
+        /*
+         * Create the dataset and write the array data to it.
+         */
+        dset = H5Dcreate (file, "data", filetype, space, H5P_DEFAULT, H5P_DEFAULT,
+                          H5P_DEFAULT);
+        status = H5Dwrite (dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT,&m_storage->data());
+
+        /*
+         * Close and release resources.
+         */
+        status = H5Dclose (dset);
+        status = H5Sclose (space);
+        status = H5Tclose (filetype);
+        status = H5Tclose (memtype);
+        status = H5Fclose (file);
+
+    }
+
     void develop() override {
         //TODO: improve the way this handles the creation of the file destination
         if (m_dest_file.empty())
@@ -415,6 +456,13 @@ public:
 
         // Remove extension if it exists
         fs::create_directory(directoryname.replace_extension());
+
+        if (m_file_format == Bitmap::FileFormat::HDF5) {
+
+
+            return;
+        }
+
 
         for(int i = 0; i < m_size.y(); ++i) {
             std::string filename_str = "frame_" + std::to_string(i);

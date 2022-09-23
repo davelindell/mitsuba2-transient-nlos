@@ -221,12 +221,20 @@ endif()
 # Build the dependencies
 add_subdirectory(ext ext_build)
 
+# build hdf5
+# find_package(HDF5 REQUIRED COMPONENTS C CXX)
+# link_libraries(${HDF5_C_LIBRARIES} ${HDF5_CXX_LIBRARIES})
+
+link_directories(${CMAKE_CURRENT_BINARY_DIR}/ext_build/hdf5/bin)
+link_libraries(hdf5)
+
 # Always add the include directories for tinyformat, Enoki and Eigen
 include_directories(include
   ${TINYFORMAT_INCLUDE_DIRS}
   ${EIGEN_INCLUDE_DIRS}
   ${ENOKI_INCLUDE_DIRS}
   ${TBB_INCLUDE_DIRS}
+  ${HDF5_INCLUDE_DIRS}
 )
 
 if (MTS_ENABLE_EMBREE)

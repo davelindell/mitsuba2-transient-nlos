@@ -25,8 +25,8 @@
             <integer name="sample_count" value="1024"/>
         </sampler>
         <film type="streakhdrfilm" name="streakfilm">
-            <integer name="width" value="128"/>
-            <integer name="height" value="128"/>
+            <integer name="width" value="16"/>
+            <integer name="height" value="16"/>
             <integer name="time" value="400"/>
             <float name="exposure_time" value="1"/>
             <float name="time_offset" value="0"/>

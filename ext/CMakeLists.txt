@@ -242,6 +242,12 @@ elseif (${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm64")
     set_property(TARGET asmjit PROPERTY FOLDER "dependencies")
 endif()
 
+# build HDF5
+set(HDF5_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/hdf5/src
+                      ${CMAKE_CURRENT_SOURCE_DIR}/hdf5/src/H5FDsubfiling
+                      ${CMAKE_CURRENT_BINARY_DIR}/hdf5/src PARENT_SCOPE)
+add_subdirectory(hdf5)
+
 # Disable annoying MSVC warnings in rgb2spec build
 if (MSVC)
   add_definitions(/D "_CRT_SECURE_NO_WARNINGS")
