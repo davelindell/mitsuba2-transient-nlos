@@ -44,7 +44,6 @@ public:
         const BSDFPtr &bsdf, const Spectrum &throughput, const Float &path_opl,
         const Float &current_ior, const int &depth, SurfaceInteraction3f &first_si) const {
 
-
         DirectionSample3f ds;
         Spectrum emitter_val;
 
@@ -299,7 +298,9 @@ public:
                 active && has_flag(bsdf->flags(), BSDFFlags::Smooth);
 
             if (likely(any_or<true>(active_e))) {
-                if (m_nlos_laser_sampling) {
+                // if we are doing confocal sampling and depth==1 (i.e., direct reflection)
+                // do not use laser sampling
+                if (m_nlos_laser_sampling && !(m_is_confocal && (depth==1))) {
                     // laser sampling (nee modified for nlos scenes)
                     emitter_laser_sample(scene, sampler, ctx, si, active_e,
                                          timed_samples_record, bsdf, throughput,

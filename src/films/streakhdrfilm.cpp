@@ -405,13 +405,36 @@ public:
         hid_t       file, filetype, space, dset;
         herr_t      status;
         hsize_t dims[4] = {(uint) m_storage->size().x(), (uint) m_storage->size().y(), m_storage->time(), m_storage->channel_count()};
-        float arr[dims[0]][dims[1]][dims[2]][dims[3]];
+        Float* arr = new Float [dims[0]*dims[1]*dims[2]*dims[3]];
+        float *data = (float*) m_storage->data().managed().data();
 
+        // xyz->rgb conversion formulas
+        Vector3f xyz2r = {3.2404542, -1.5371385, -0.4985314};
+        Vector3f xyz2g = {-0.9692660, 1.8760108, 0.0415560};
+        Vector3f xyz2b = {0.0556434, -0.2040259, 1.0572252};
 
+        // iterate over all elements to convert xyz
+        // there's probably a vectorized way to do this more efficiently
+        // with enoki, but this is good enough for now...
+        for (int i=0; i<dims[0]; i++) {
+            for (int j=0; j<dims[1]; j++) {
+                for (int k=0; k<dims[2]; k++) {
+                    float tmp[4];
+                    tmp[0] = data[i*dims[1]*dims[2]*dims[3] + j*dims[2]*dims[3] + k*dims[3] + 0];
+                    tmp[1] = data[i*dims[1]*dims[2]*dims[3] + j*dims[2]*dims[3] + k*dims[3] + 1];
+                    tmp[2] = data[i*dims[1]*dims[2]*dims[3] + j*dims[2]*dims[3] + k*dims[3] + 2];
+                    tmp[3] = data[i*dims[1]*dims[2]*dims[3] + j*dims[2]*dims[3] + k*dims[3] + 3];
 
-        /*
-         * Create a new file using the default properties.
-         */
+                    // multiply to convert rgba->xyza and add to array
+                    arr[i*dims[1]*dims[2]*dims[3] + j*dims[2]*dims[3] + k*dims[3] + 0] = tmp[0] * xyz2r[0] + tmp[1] * xyz2r[1] + tmp[2] * xyz2r[2];
+                    arr[i*dims[1]*dims[2]*dims[3] + j*dims[2]*dims[3] + k*dims[3] + 1] = tmp[0] * xyz2g[0] + tmp[1] * xyz2g[1] + tmp[2] * xyz2g[2];
+                    arr[i*dims[1]*dims[2]*dims[3] + j*dims[2]*dims[3] + k*dims[3] + 2] = tmp[0] * xyz2b[0] + tmp[1] * xyz2b[1] + tmp[2] * xyz2b[2];
+                    arr[i*dims[1]*dims[2]*dims[3] + j*dims[2]*dims[3] + k*dims[3] + 3] = tmp[3];
+                }
+            }
+        }
+
+         // Create a new file using the default properties.
         std::string filename_str = m_dest_file.replace_extension().string() + "/data.h5";
         file = H5Fcreate(filename_str.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -419,16 +442,14 @@ public:
         filetype = H5Tcopy(H5T_NATIVE_FLOAT);
         dset = H5Dcreate(file, "data", filetype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         status = H5Dwrite(dset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
-                          H5P_DEFAULT, (void *) m_storage->data().managed().data());
+                          H5P_DEFAULT, (uint8_t *) arr); //m_storage->data().managed().data());
 
-        /*
-         * Close and release resources.
-         */
+        // close file
         status = H5Dclose (dset);
         status = H5Sclose (space);
         status = H5Tclose (filetype);
         status = H5Fclose (file);
-
+        free(arr);
     }
 
     void develop() override {
