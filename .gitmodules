@@ -39,4 +39,4 @@
     url = https://github.com/wjakob/embree
 [submodule "ext/hdf5"]
 	path = ext/hdf5
-	url = git@github.com:HDFGroup/hdf5.git
+	url = https://github.com/HDFGroup/hdf5.git 
