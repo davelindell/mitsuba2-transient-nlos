@@ -50,7 +50,13 @@ public:
         if (m_is_confocal) {
             auto [ds_tmp, emitter_val_tmp] = scene->sample_emitter_direction_confocal(
                     si, sampler->next_2d(active_e), first_si, true, active_e);
-            active_e &= neq(ds.pdf, 0.f);
+            // active_e &= neq(ds.pdf, 0.f);
+            // ds.pdf can be a very small, non-zero number... but this should still evaluate to true
+            // and it isn't because of floating point error. For mysterious reasons, the above line evaluates to true
+            // when compiled on mac but always is false on linux. The mac version appears to implement the correct
+            // behavior and never evaluates to false for the confocal setup. Therefore we hardcode this to true for now,
+            // otherwise the output is always a black image.
+            active_e = true;
             ds = ds_tmp;
             emitter_val = emitter_val_tmp;
         }
