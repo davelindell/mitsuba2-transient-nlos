@@ -435,7 +435,7 @@ public:
         }
 
          // Create a new file using the default properties.
-        std::string filename_str = m_dest_file.replace_extension().string() + "/data.h5";
+        std::string filename_str = m_dest_file.replace_extension().string() + ".h5";
         file = H5Fcreate(filename_str.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
         space = H5Screate_simple(4, dims, NULL);
@@ -467,7 +467,7 @@ public:
             proper_extension = ".pfm";
 
         // Remove extension if it exists
-        fs::create_directory(directoryname.replace_extension());
+        fs::create_directory(directoryname.parent_path());
 
         if (m_file_format == Bitmap::FileFormat::HDF5) {
             write_hdf5();
