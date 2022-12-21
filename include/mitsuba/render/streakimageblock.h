@@ -237,7 +237,7 @@ protected:
     DynamicBuffer<Float> m_data;
     const ReconstructionFilter *m_filter;
     const ReconstructionFilter *m_time_filter;
-    Float *m_weights_x, *m_weights_y;
+    Float *m_weights_x, *m_weights_y, *m_weights_t;
     bool m_warn_negative;
     bool m_warn_invalid;
     bool m_normalize;
