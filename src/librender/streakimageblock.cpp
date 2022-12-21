@@ -226,6 +226,7 @@ StreakImageBlock<Float, Spectrum>::put(
                                                        x * m_time + t);
                         Float weight  = m_weights_y[yr] * m_weights_x[xr]* m_weights_t[tr];
 
+                        enabled &= t <= hi_t;
 
                         ENOKI_NOUNROLL for (uint32_t k = 0; k < m_channel_count; ++k)
                             scatter_add(m_data, radiance_sample.values[k] * weight, offset + k, enabled);
@@ -233,12 +234,54 @@ StreakImageBlock<Float, Spectrum>::put(
                 }
             }
         } else {
+
+                        /// This is all for the time filter
+            Float lo_t = Float(ceil2int<Int32>(pos_sensor - filter_radius_t));
+            Float hi_t = Float(floor2int<Int32>(pos_sensor + filter_radius_t));
+
+            uint32_t n_t = ceil2int<uint32_t>((m_time_filter->radius() - 2.f * math::RayEpsilon<ScalarFloat>) *2.f);
+
+            Float base_t = lo_t - pos_sensor;
+            for (uint32_t i = 0; i < n_t; ++i) {
+                Float p = base_t + i;
+                if constexpr (!is_cuda_array_v<Float>) {
+                    m_weights_t[i] = m_time_filter->eval_discretized(p, active);
+                } else {
+                    m_weights_t[i] = m_time_filter->eval(p, active);
+                }
+            }
+
+            if (unlikely(m_normalize)) {
+                Float wt(0);
+                for (uint32_t i = 0; i <= n_t; ++i) {
+                    wt += m_weights_t[i];
+                }
+                Float factor = rcp(wt);
+                for (uint32_t i = 0; i <= n_t; ++i)
+                    m_weights_t[i] *= factor;
+            }
+
+
             Point2u lo    = ceil2int<Point2i>(pos - .5f);
-            UInt32 offset = m_channel_count * (lo.y() * size.x() * m_time +
-                                               lo.x() * m_time + pos_sensor_int);
+//            UInt32 offset = m_channel_count * (lo.y() * size.x() * m_time +
+//                                               lo.x() * m_time + pos_sensor_int);
             Mask enabled  = active && all(lo >= 0u && lo < size);
-            ENOKI_NOUNROLL for (uint32_t k = 0; k < m_channel_count; ++k)
-                scatter_add(m_data, radiance_sample.values[k], offset + k, enabled);
+
+            ENOKI_NOUNROLL for (uint32_t tr = 0; tr < n_t; ++tr) {
+                UInt32 t  = lo_t + tr;
+
+                UInt32 offset = m_channel_count * (lo.y() * size.x() * m_time +
+                                               lo.x() * m_time + t);
+                Float weight  = m_weights_t[tr];
+                enabled &= t <= hi_t;
+
+
+                ENOKI_NOUNROLL for (uint32_t k = 0; k < m_channel_count; ++k)
+                    scatter_add(m_data, radiance_sample.values[k] * weight, offset + k, enabled);
+            }
+
+//            ENOKI_NOUNROLL for (uint32_t k = 0; k < m_channel_count; ++k)
+//                scatter_add(m_data, radiance_sample.values[k], offset + k, enabled);
         }
     }
 }
