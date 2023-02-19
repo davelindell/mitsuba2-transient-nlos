@@ -142,7 +142,14 @@ public:
             // The incident cos term at
             // nlos_laser_target will be taken into account by
             // emitter_nee_sample's bsdf
-            bsdf_val *= sqr(rcp(dist)) * Frame3f::cos_theta(wl);
+
+            Float dist_falloff = dist;
+            if (dist_falloff < 1) {
+                dist_falloff = 1;
+            }
+
+            bsdf_val *= sqr(rcp(dist_falloff)) * Frame3f::cos_theta(wl);
+            //bsdf_val *= Frame3f::cos_theta(wl);
 
             if (any(active_e)) {
                 BSDFPtr bsdf_next = si_bsdf.bsdf(ray_bsdf);
@@ -286,7 +293,7 @@ public:
             // if there are no more active lanes. Only do this latter check
             // in GPU mode when the number of requested bounces is infinite
             // since it causes a costly synchronization.
-            if ((uint32_t) depth >= (uint32_t) m_max_depth ||
+            if ((uint32_t) depth > (uint32_t) m_max_depth ||
                 ((!is_cuda_array_v<Float> || m_max_depth < 0) && none(active)))
                 break;
 
