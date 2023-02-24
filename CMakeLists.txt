@@ -5,7 +5,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/resource
 
 # set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/dist")
 
-
 # ---------- Setup mitsuba.conf ----------
 
 if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/mitsuba.conf)
@@ -218,7 +217,16 @@ endif()
 if (UNIX AND NOT APPLE)
   # Fix to point the compiler to a header file (__cxxabi_config.h)
   # on recent versions of Debian/Ubuntu
-  include_directories(/usr/include/libcxxabi)
+  # include_directories(/usr/include/libcxxabi)
+  # include_directories("/usr/include/x86_64-linux-gnu")
+
+  # include_directories("/h/lindell/.conda/envs/py38/include")
+  #include_directories("${CMAKE_CURRENT_SOURCE_DIR}/ext/libjpeg")
+  #link_directories("/h/lindell/.conda/envs/py38/lib")
+  #link_directories("/lib/x86_64-linux-gnu")
+  # link_directories("/h/lindell/.conda/envs/py38/x86_64-conda-linux-gnu/sysroot/lib64")
+  # link_directories("/lib65" "/lib/x86_64-linux-gnu")
+
 endif()
 
 # Build the dependencies
