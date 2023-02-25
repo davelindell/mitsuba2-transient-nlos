@@ -6016,6 +6016,8 @@ static const char *__doc_mitsuba_StreakImageBlock_m_weights_x = R"doc()doc";
 
 static const char *__doc_mitsuba_StreakImageBlock_m_weights_y = R"doc()doc";
 
+static const char *__doc_mitsuba_StreakImageBlock_m_weights_t = R"doc()doc";
+
 static const char *__doc_mitsuba_StreakImageBlock_offset = R"doc(Return the current block offset)doc";
 
 static const char *__doc_mitsuba_StreakImageBlock_put = R"doc(Accumulate another streak image block into this one)doc";

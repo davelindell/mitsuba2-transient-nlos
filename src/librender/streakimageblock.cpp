@@ -13,7 +13,7 @@ StreakImageBlock<Float, Spectrum>::StreakImageBlock(
     : m_offset(0), m_size(0), m_time(0), m_exposure_time(exposure_time),
       m_time_offset(time_offset), m_channel_count((uint32_t) channel_count),
       m_filter(filter), m_time_filter(time_filter), m_weights_x(nullptr),
-      m_weights_y(nullptr), m_warn_negative(warn_negative),
+      m_weights_y(nullptr), m_weights_t(nullptr), m_warn_negative(warn_negative),
       m_warn_invalid(warn_invalid), m_normalize(normalize) {
 
     m_border_size = (uint32_t)((filter != nullptr && border) ? filter->border_size() : 0);
@@ -26,7 +26,11 @@ StreakImageBlock<Float, Spectrum>::StreakImageBlock(
         m_weights_y     = m_weights_x + filter_size;
     }
 
-    // TODO(jorge): initialize also the time_filter
+    if (time_filter) {
+        // Temporary buffers used in put()
+        int filter_size = (int) std::ceil(2 * time_filter->radius()) + 1;
+        m_weights_t     = new Float[2 * filter_size];
+    }
 
     set_size(size, time);
 }
@@ -36,6 +40,9 @@ MTS_VARIANT StreakImageBlock<Float, Spectrum>::~StreakImageBlock() {
        m_weights_x, so there is no need to delete it. */
     if (m_weights_x)
         delete[] m_weights_x;
+    if (m_weights_t)
+        delete[] m_weights_t;
+
 }
 
 MTS_VARIANT void StreakImageBlock<Float, Spectrum>::clear() {
@@ -96,6 +103,8 @@ StreakImageBlock<Float, Spectrum>::put(
     const Point2f &pos_, const std::vector<FloatSample<Float>> &values) {
     ScopedPhase sp(ProfilerPhase::ImageBlockPut);
     Assert(m_filter != nullptr);
+    Assert(m_time_filter != nullptr);
+
     // TODO(jorge): assert m_time_filter != nullptr and use it later
 
     for (const auto &radiance_sample : values) {
@@ -136,6 +145,10 @@ StreakImageBlock<Float, Spectrum>::put(
         active &= (0 <= pos_sensor_int && pos_sensor_int < m_time);
 
         ScalarFloat filter_radius = m_filter->radius();
+
+        /// time
+        ScalarFloat filter_radius_t = m_time_filter->radius();
+
         ScalarVector2i size       = m_size + 2 * m_border_size;
 
         // Convert to pixel coordinates within the image block
@@ -146,7 +159,7 @@ StreakImageBlock<Float, Spectrum>::put(
             Point2u lo = Point2u(max(ceil2int<Point2i>(pos - filter_radius), 0)),
                     hi = Point2u(min(floor2int<Point2i>(pos + filter_radius), size - 1));
 
-            uint32_t n = ceil2int<uint32_t>((m_filter->radius() - 2.f * math::RayEpsilon<ScalarFloat>) *2.f);
+            uint32_t n = ceil2int<uint32_t>((m_filter->radius() - 2.f * math::RayEpsilon<ScalarFloat>) * 2.f);
 
             Point2f base = lo - pos;
             for (uint32_t i = 0; i < n; ++i) {
@@ -157,6 +170,29 @@ StreakImageBlock<Float, Spectrum>::put(
                 } else {
                     m_weights_x[i] = m_filter->eval(p.x(), active);
                     m_weights_y[i] = m_filter->eval(p.y(), active);
+                }
+            }
+
+            /// This is all for the time filter
+            Float lo_t = Float(ceil2int<Int32>(pos_sensor - filter_radius_t));
+            Float hi_t = Float(floor2int<Int32>(pos_sensor + filter_radius_t));
+
+            uint32_t n_t = ceil2int<uint32_t>((m_time_filter->radius() - 2.f * math::RayEpsilon<ScalarFloat>) *2.f);
+
+            if (filter_radius_t < 0.5f + math::RayEpsilon<Float>) {
+                lo_t = pos_sensor_int;
+                hi_t = pos_sensor_int;
+                m_weights_t[0] = 1.0;
+            }
+            else {
+                Float base_t = lo_t - pos_sensor;
+                for (uint32_t i = 0; i < n_t; ++i) {
+                    Float p = base_t + i;
+                    if constexpr (!is_cuda_array_v<Float>) {
+                        m_weights_t[i] = m_time_filter->eval_discretized(p, active);
+                    } else {
+                        m_weights_t[i] = m_time_filter->eval(p, active);
+                    }
                 }
             }
 
@@ -171,19 +207,37 @@ StreakImageBlock<Float, Spectrum>::put(
                     m_weights_x[i] *= factor;
             }
 
+
+            if (unlikely(m_normalize)) {
+                Float wt(0);
+                for (uint32_t i = 0; i <= n_t; ++i) {
+                    wt += m_weights_t[i];
+                }
+                Float factor = rcp(wt);
+                for (uint32_t i = 0; i <= n_t; ++i)
+                    m_weights_t[i] *= factor;
+            }
+
             ENOKI_NOUNROLL for (uint32_t yr = 0; yr < n; ++yr) {
                 UInt32 y     = lo.y() + yr;
                 Mask enabled = active && y <= hi.y();
 
                 ENOKI_NOUNROLL for (uint32_t xr = 0; xr < n; ++xr) {
                     UInt32 x      = lo.x() + xr;
-                    UInt32 offset = m_channel_count * (y * size.x() * m_time +
-                                                       x * m_time + pos_sensor_int);
-                    Float weight  = m_weights_y[yr] * m_weights_x[xr];
 
                     enabled &= x <= hi.x();
-                    ENOKI_NOUNROLL for (uint32_t k = 0; k < m_channel_count; ++k)
-                        scatter_add(m_data, radiance_sample.values[k] * weight, offset + k, enabled);
+                    ENOKI_NOUNROLL for (uint32_t tr = 0; tr < n_t; ++tr) {
+                        UInt32 t  = lo_t + tr;
+
+                        UInt32 offset = m_channel_count * (y * size.x() * m_time +
+                                                       x * m_time + t);
+                        Float weight  = m_weights_y[yr] * m_weights_x[xr]* m_weights_t[tr];
+
+                        enabled &= t <= hi_t;
+
+                        ENOKI_NOUNROLL for (uint32_t k = 0; k < m_channel_count; ++k)
+                            scatter_add(m_data, radiance_sample.values[k] * weight, offset + k, enabled);
+                    }
                 }
             }
         } else {
@@ -193,6 +247,7 @@ StreakImageBlock<Float, Spectrum>::put(
             Mask enabled  = active && all(lo >= 0u && lo < size);
             ENOKI_NOUNROLL for (uint32_t k = 0; k < m_channel_count; ++k)
                 scatter_add(m_data, radiance_sample.values[k], offset + k, enabled);
+
         }
     }
 }

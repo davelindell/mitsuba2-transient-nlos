@@ -7,7 +7,7 @@
 NAMESPACE_BEGIN(mitsuba)
 
 /// Reconstruction filters will be tabulated at this resolution
-#define MTS_FILTER_RESOLUTION 31
+#define MTS_FILTER_RESOLUTION 255
 
 /**
  * \brief When resampling data to a different resolution using \ref
