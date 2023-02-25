@@ -174,10 +174,9 @@ StreakImageBlock<Float, Spectrum>::put(
             }
 
             /// This is all for the time filter
-            Float lo_t = Float(ceil2int<Int32>(pos_sensor - filter_radius_t));
-            Float hi_t = Float(floor2int<Int32>(pos_sensor + filter_radius_t));
-
             uint32_t n_t = ceil2int<uint32_t>((m_time_filter->radius() - 2.f * math::RayEpsilon<ScalarFloat>) *2.f);
+            Float lo_t = Float(max(ceil2int<Int32>(pos_sensor - filter_radius_t), 0));
+            Float hi_t = Float(min(floor2int<Int32>(pos_sensor + filter_radius_t), m_time-1));
 
             if (filter_radius_t < 0.5f + math::RayEpsilon<Float>) {
                 lo_t = pos_sensor_int;
