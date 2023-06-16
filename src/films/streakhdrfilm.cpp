@@ -6,6 +6,9 @@
 #include <mitsuba/render/streakfilm.h>
 #include <mitsuba/render/fwd.h>
 #include <mitsuba/render/streakimageblock.h>
+#include <torch/torch.h>
+
+
 
 #include <mutex>
 
@@ -184,7 +187,7 @@ public:
     }
 
     void put(const ImageBlock * /* block */) override {
-        NotImplementedError("put");
+        MitsubaNotImplementedError("put");
     }
 
     void put(const StreakImageBlock *block) override {
@@ -512,6 +515,24 @@ void write_hdf5_compressed() {
         free(arr);
     }
 
+    void write_sparse_tensor()
+    {
+        std::string filename_str = m_dest_file.replace_extension().string() + ".pt";
+
+        int64_t x_dim = static_cast<int64_t>(m_storage->size().x());
+        int64_t y_dim = static_cast<int64_t>(m_storage->size().y());
+        int64_t t_dim = static_cast<int64_t>(m_storage->time());
+        int64_t c_dim = static_cast<int64_t>(m_storage->channel_count());
+
+        // Create a dense tensor
+        torch::TensorOptions options = torch::TensorOptions().dtype(torch::kFloat32);
+        torch::Tensor dense_tensor = torch::from_blob(m_storage->data().managed().data(), {x_dim, y_dim, t_dim, c_dim}, options);
+
+        // Convert the dense tensor to a sparse tensor
+        torch::Tensor sparse_tensor = dense_tensor.to_sparse();
+        torch::save(sparse_tensor, filename_str);
+    }
+
     void develop() override {
         //TODO: improve the way this handles the creation of the file destination
         if (m_dest_file.empty())
@@ -531,7 +552,8 @@ void write_hdf5_compressed() {
 
         if (m_file_format == Bitmap::FileFormat::HDF5) {
             // write_hdf5();
-            write_hdf5_compressed();
+            // write_hdf5_compressed();
+            write_sparse_tensor();
         }
         else {
             for (int i = 0; i < m_size.y(); ++i) {

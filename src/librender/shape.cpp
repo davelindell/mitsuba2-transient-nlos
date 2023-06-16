@@ -95,11 +95,11 @@ MTS_VARIANT std::string Shape<Float, Spectrum>::id() const {
 MTS_VARIANT typename Shape<Float, Spectrum>::PositionSample3f
 Shape<Float, Spectrum>::sample_position(Float /*time*/, const Point2f & /*sample*/,
                                         Mask /*active*/) const {
-    NotImplementedError("sample_position");
+    MitsubaNotImplementedError("sample_position");
 }
 
 MTS_VARIANT Float Shape<Float, Spectrum>::pdf_position(const PositionSample3f & /*ps*/, Mask /*active*/) const {
-    NotImplementedError("pdf_position");
+    MitsubaNotImplementedError("pdf_position");
 }
 
 #if defined(MTS_ENABLE_EMBREE)
@@ -255,7 +255,7 @@ MTS_VARIANT RTCGeometry Shape<Float, Spectrum>::embree_geometry(RTCDevice device
 static const uint32_t optix_geometry_flags[1] = { OPTIX_GEOMETRY_FLAG_DISABLE_ANYHIT };
 
 MTS_VARIANT void Shape<Float, Spectrum>::optix_prepare_geometry() {
-    NotImplementedError("optix_prepare_geometry");
+    MitsubaNotImplementedError("optix_prepare_geometry");
 }
 
 MTS_VARIANT
@@ -275,7 +275,7 @@ MTS_VARIANT void Shape<Float, Spectrum>::optix_prepare_ias(const OptixDeviceCont
                                                            std::vector<OptixInstance>& /*instances*/,
                                                            uint32_t /*instance_id*/,
                                                            const ScalarTransform4f& /*transf*/) {
-    NotImplementedError("optix_prepare_ias");
+    MitsubaNotImplementedError("optix_prepare_ias");
 }
 
 MTS_VARIANT void Shape<Float, Spectrum>::optix_build_input(OptixBuildInput &build_input) const {
@@ -324,7 +324,7 @@ MTS_VARIANT Float Shape<Float, Spectrum>::pdf_direction(const Interaction3f & /*
 
 MTS_VARIANT typename Shape<Float, Spectrum>::PreliminaryIntersection3f
 Shape<Float, Spectrum>::ray_intersect_preliminary(const Ray3f & /*ray*/, Mask /*active*/) const {
-    NotImplementedError("ray_intersect_preliminary");
+    MitsubaNotImplementedError("ray_intersect_preliminary");
 }
 
 MTS_VARIANT typename Shape<Float, Spectrum>::Mask
@@ -338,7 +338,7 @@ Shape<Float, Spectrum>::compute_surface_interaction(const Ray3f & /*ray*/,
                                                     PreliminaryIntersection3f /*pi*/,
                                                     HitComputeFlags /*flags*/,
                                                     Mask /*active*/) const {
-    NotImplementedError("compute_surface_interaction");
+    MitsubaNotImplementedError("compute_surface_interaction");
 }
 
 MTS_VARIANT typename Shape<Float, Spectrum>::SurfaceInteraction3f
@@ -355,25 +355,25 @@ MTS_VARIANT typename Shape<Float, Spectrum>::UnpolarizedSpectrum
 Shape<Float, Spectrum>::eval_attribute(const std::string & /*name*/,
                                        const SurfaceInteraction3f & /*si*/,
                                        Mask /*active*/) const {
-    NotImplementedError("eval_attribute");
+    MitsubaNotImplementedError("eval_attribute");
 }
 
 MTS_VARIANT Float
 Shape<Float, Spectrum>::eval_attribute_1(const std::string& /*name*/,
                                          const SurfaceInteraction3f &/*si*/,
                                          Mask /*active*/) const {
-    NotImplementedError("eval_attribute_1");
+    MitsubaNotImplementedError("eval_attribute_1");
 }
 MTS_VARIANT typename Shape<Float, Spectrum>::Color3f
 Shape<Float, Spectrum>::eval_attribute_3(const std::string& /*name*/,
                                          const SurfaceInteraction3f &/*si*/,
                                          Mask /*active*/) const {
-    NotImplementedError("eval_attribute_3");
+    MitsubaNotImplementedError("eval_attribute_3");
 }
 
 MTS_VARIANT typename Shape<Float, Spectrum>::ScalarFloat
 Shape<Float, Spectrum>::surface_area() const {
-    NotImplementedError("surface_area");
+    MitsubaNotImplementedError("surface_area");
 }
 
 MTS_VARIANT typename Shape<Float, Spectrum>::ScalarBoundingBox3f
@@ -434,7 +434,7 @@ MTS_VARIANT void Shape<Float, Spectrum>::set_children() {
 MTS_VARIANT
 typename Shape<Float, Spectrum>::SurfaceInteraction3f
 Shape<Float, Spectrum>::eval_parameterization(const Point2f &, Mask) const {
-    NotImplementedError("eval_parameterization");
+    MitsubaNotImplementedError("eval_parameterization");
 }
 
 MTS_VARIANT std::string Shape<Float, Spectrum>::get_children_string() const {

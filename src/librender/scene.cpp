@@ -182,7 +182,7 @@ Scene<Float, Spectrum>::ray_intersect_naive(const Ray3f &ray, Mask active) const
 #endif
     ENOKI_MARK_USED(ray);
     ENOKI_MARK_USED(active);
-    NotImplementedError("ray_intersect_naive");
+    MitsubaNotImplementedError("ray_intersect_naive");
 }
 
 MTS_VARIANT typename Scene<Float, Spectrum>::Mask

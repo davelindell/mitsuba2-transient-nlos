@@ -17,38 +17,38 @@ MTS_VARIANT Texture<Float, Spectrum>::~Texture() { }
 
 MTS_VARIANT typename Texture<Float, Spectrum>::UnpolarizedSpectrum
 Texture<Float, Spectrum>::eval(const SurfaceInteraction3f &, Mask) const {
-    NotImplementedError("eval");
+    MitsubaNotImplementedError("eval");
 }
 
 MTS_VARIANT std::pair<typename Texture<Float, Spectrum>::Wavelength,
                       typename Texture<Float, Spectrum>::UnpolarizedSpectrum>
 Texture<Float, Spectrum>::sample_spectrum(const SurfaceInteraction3f &,
                                           const Wavelength &, Mask) const {
-    NotImplementedError("sample_spectrum");
+    MitsubaNotImplementedError("sample_spectrum");
 }
 
 MTS_VARIANT typename Texture<Float, Spectrum>::Wavelength
 Texture<Float, Spectrum>::pdf_spectrum(const SurfaceInteraction3f &, Mask) const {
-    NotImplementedError("pdf_spectrum");
+    MitsubaNotImplementedError("pdf_spectrum");
 }
 
 MTS_VARIANT Float Texture<Float, Spectrum>::eval_1(const SurfaceInteraction3f &, Mask) const {
-    NotImplementedError("eval_1");
+    MitsubaNotImplementedError("eval_1");
 }
 
 MTS_VARIANT typename Texture<Float, Spectrum>::Vector2f
 Texture<Float, Spectrum>::eval_1_grad(const SurfaceInteraction3f &, Mask) const {
-    NotImplementedError("eval_1_grad");
+    MitsubaNotImplementedError("eval_1_grad");
 }
 
 MTS_VARIANT typename Texture<Float, Spectrum>::Color3f
 Texture<Float, Spectrum>::eval_3(const SurfaceInteraction3f &, Mask) const {
-    NotImplementedError("eval_3");
+    MitsubaNotImplementedError("eval_3");
 }
 
 MTS_VARIANT typename Texture<Float, Spectrum>::ScalarFloat
 Texture<Float, Spectrum>::mean() const {
-    NotImplementedError("mean");
+    MitsubaNotImplementedError("mean");
 }
 
 MTS_VARIANT
@@ -93,26 +93,26 @@ MTS_VARIANT Volume<Float, Spectrum>::Volume(const Properties &props) {
 
 MTS_VARIANT typename Volume<Float, Spectrum>::UnpolarizedSpectrum
 Volume<Float, Spectrum>::eval(const Interaction3f &, Mask) const {
-    NotImplementedError("eval");
+    MitsubaNotImplementedError("eval");
 }
 
 MTS_VARIANT Float Volume<Float, Spectrum>::eval_1(const Interaction3f &, Mask) const {
-    NotImplementedError("eval_1");
+    MitsubaNotImplementedError("eval_1");
 }
 
 MTS_VARIANT typename Volume<Float, Spectrum>::Vector3f
 Volume<Float, Spectrum>::eval_3(const Interaction3f &, Mask) const {
-    NotImplementedError("eval_3");
+    MitsubaNotImplementedError("eval_3");
 }
 
 MTS_VARIANT std::pair<typename Volume<Float, Spectrum>::UnpolarizedSpectrum,
                       typename Volume<Float, Spectrum>::Vector3f>
 Volume<Float, Spectrum>::eval_gradient(const Interaction3f & /*it*/, Mask /*active*/) const {
-    NotImplementedError("eval_gradient");
+    MitsubaNotImplementedError("eval_gradient");
 }
 
 MTS_VARIANT typename Volume<Float, Spectrum>::ScalarFloat
-Volume<Float, Spectrum>::max() const { NotImplementedError("max"); }
+Volume<Float, Spectrum>::max() const { MitsubaNotImplementedError("max"); }
 
 MTS_VARIANT typename Volume<Float, Spectrum>::ScalarVector3i
 Volume<Float, Spectrum>::resolution() const {

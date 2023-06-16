@@ -43,14 +43,14 @@ Endpoint<Float, Spectrum>::sample_ray(Float /*time*/, Float /*sample1*/,
                                       const Point2f & /*sample2*/,
                                       const Point2f & /*sample3*/,
                                       Mask /*active*/) const {
-    NotImplementedError("sample_ray");
+    MitsubaNotImplementedError("sample_ray");
 }
 
 MTS_VARIANT std::pair<typename Endpoint<Float, Spectrum>::DirectionSample3f, Spectrum>
 Endpoint<Float, Spectrum>::sample_direction(const Interaction3f & /*it*/,
                                             const Point2f & /*sample*/,
                                             Mask /*active*/) const {
-    NotImplementedError("sample_direction");
+    MitsubaNotImplementedError("sample_direction");
 }
 
 MTS_VARIANT std::pair<typename Endpoint<Float, Spectrum>::DirectionSample3f, Spectrum>
@@ -58,18 +58,18 @@ Endpoint<Float, Spectrum>::sample_direction_confocal(const Interaction3f & /*it*
                                             const Point2f & /*sample*/,
                                             const Interaction3f &first_si,
                                             Mask /*active*/) const {
-    NotImplementedError("sample_direction");
+    MitsubaNotImplementedError("sample_direction");
 }
 
 MTS_VARIANT Float Endpoint<Float, Spectrum>::pdf_direction(const Interaction3f & /*it*/,
                                                            const DirectionSample3f & /*ds*/,
                                                            Mask /*active*/) const {
-    NotImplementedError("pdf_direction");
+    MitsubaNotImplementedError("pdf_direction");
 }
 
 MTS_VARIANT Spectrum Endpoint<Float, Spectrum>::eval(const SurfaceInteraction3f & /*si*/,
                                                      Mask /*active*/) const {
-    NotImplementedError("eval");
+    MitsubaNotImplementedError("eval");
 }
 
 MTS_VARIANT std::string Endpoint<Float, Spectrum>::id() const { return m_id; }

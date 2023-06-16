@@ -34,7 +34,7 @@ public:
     }
 
 
-    ScalarFloat max() const override { NotImplementedError("max"); }
+    ScalarFloat max() const override { MitsubaNotImplementedError("max"); }
 
     void traverse(TraversalCallback *callback) override {
         callback->put_object("color", m_color.get());

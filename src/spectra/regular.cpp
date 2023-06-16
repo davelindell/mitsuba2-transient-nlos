@@ -71,7 +71,7 @@ public:
         if constexpr (is_spectral_v<Spectrum>)
             return m_distr.eval_pdf(si.wavelengths, active);
         else
-            NotImplementedError("eval");
+            MitsubaNotImplementedError("eval");
     }
 
     Wavelength pdf_spectrum(const SurfaceInteraction3f &si, Mask active) const override {
@@ -80,7 +80,7 @@ public:
         if constexpr (is_spectral_v<Spectrum>)
             return m_distr.eval_pdf_normalized(si.wavelengths, active);
         else
-            NotImplementedError("pdf");
+            MitsubaNotImplementedError("pdf");
     }
 
     std::pair<Wavelength, UnpolarizedSpectrum>
@@ -92,7 +92,7 @@ public:
             return { m_distr.sample(sample, active), m_distr.integral() };
         else {
             ENOKI_MARK_USED(sample);
-            NotImplementedError("sample");
+            MitsubaNotImplementedError("sample");
         }
     }
 

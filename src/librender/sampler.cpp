@@ -40,12 +40,12 @@ MTS_VARIANT void Sampler<Float, Spectrum>::advance() {
 }
 
 MTS_VARIANT Float Sampler<Float, Spectrum>::next_1d(Mask) {
-    NotImplementedError("next_1d");
+    MitsubaNotImplementedError("next_1d");
 }
 
 MTS_VARIANT typename Sampler<Float, Spectrum>::Point2f
 Sampler<Float, Spectrum>::next_2d(Mask) {
-    NotImplementedError("next_2d");
+    MitsubaNotImplementedError("next_2d");
 }
 
 MTS_VARIANT void

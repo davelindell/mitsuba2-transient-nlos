@@ -80,7 +80,7 @@ public:
             return m_distr.eval_pdf(si.wavelengths, active);
         else {
             ENOKI_MARK_USED(si);
-            NotImplementedError("eval");
+            MitsubaNotImplementedError("eval");
         }
     }
 
@@ -91,7 +91,7 @@ public:
             return m_distr.eval_pdf_normalized(si.wavelengths, active);
         else {
             ENOKI_MARK_USED(si);
-            NotImplementedError("pdf");
+            MitsubaNotImplementedError("pdf");
         }
     }
 
@@ -104,7 +104,7 @@ public:
             return { m_distr.sample(sample, active), m_distr.integral() };
         else {
             ENOKI_MARK_USED(sample);
-            NotImplementedError("sample");
+            MitsubaNotImplementedError("sample");
         }
     }
 

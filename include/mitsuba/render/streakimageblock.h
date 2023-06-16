@@ -124,7 +124,7 @@ public:
         // std::vector<FloatSample<Float>> (values) and call the function below
         // Note that the alpha parameter is related to the mask found in
         // timed_samples_record, so you can probably remove that too
-        NotImplementedError("put");
+        MitsubaNotImplementedError("put");
     }
 
 

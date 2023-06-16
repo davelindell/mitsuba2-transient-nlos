@@ -362,7 +362,7 @@ MTS_VARIANT void TransientSamplingIntegrator<Float, Spectrum>::sample(
     std::vector<FloatSample<Float>> & /* aovs_record */,
     std::vector<RadianceSample<Float, Spectrum>> & /* timed_samples_record */,
     Float /* max_path_opl */, Mask /* active */) const {
-    NotImplementedError("sample");
+    MitsubaNotImplementedError("sample");
 }
 
 // -----------------------------------------------------------------------------

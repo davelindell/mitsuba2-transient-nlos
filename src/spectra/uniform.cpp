@@ -54,7 +54,7 @@ public:
             return select(active_w,
                 Wavelength(1.f / (MTS_WAVELENGTH_MAX - MTS_WAVELENGTH_MIN)), Wavelength(0.f));
         } else {
-            NotImplementedError("pdf");
+            MitsubaNotImplementedError("pdf");
         }
     }
 
@@ -68,7 +68,7 @@ public:
                      m_value * (MTS_WAVELENGTH_MAX - MTS_WAVELENGTH_MIN) };
         } else {
             ENOKI_MARK_USED(sample);
-            NotImplementedError("sample");
+            MitsubaNotImplementedError("sample");
         }
     }
 

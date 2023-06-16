@@ -150,7 +150,7 @@ public:
                                           const Point2f & /* sample2 */,
                                           const Point2f & /* sample3 */,
                                           Mask /* active */) const override {
-        NotImplementedError("sample_ray");
+        MitsubaNotImplementedError("sample_ray");
     }
 
     std::pair<DirectionSample3f, Spectrum>

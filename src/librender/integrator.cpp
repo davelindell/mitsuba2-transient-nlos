@@ -296,7 +296,7 @@ SamplingIntegrator<Float, Spectrum>::sample(const Scene * /* scene */,
                                             const Medium * /* medium */,
                                             Float * /* aovs */,
                                             Mask /* active */) const {
-    NotImplementedError("sample");
+    MitsubaNotImplementedError("sample");
 }
 
 // -----------------------------------------------------------------------------
