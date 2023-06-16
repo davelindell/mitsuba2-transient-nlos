@@ -99,7 +99,15 @@ if (WIN32)
 
   set_property(TARGET zlib PROPERTY FOLDER "dependencies")
   include_directories(${ZLIB_INCLUDE_DIR} "${CMAKE_CURRENT_BINARY_DIR}/zlib")
+
+else()
+  find_package(ZLIB REQUIRED)
+  set(ZLIB_INCLUDE_DIR ${ZLIB_INCLUDE_DIRS} CACHE PATH "")
+  set(ZLIB_LIBRARY ${ZLIB_LIBRARIES} CACHE FILEPATH "")
 endif()
+
+# Enable zlib support for HDF5
+set(HDF5_ENABLE_Z_LIB_SUPPORT ON CACHE BOOL "")
 
 if (WIN32 OR APPLE)
   # Build libpng 1.6 (on Windows & MacOS)
