@@ -166,6 +166,21 @@ _Note that variables that start with $ should be changed_
 Refer to the [original Mitsuba 2 repository](https://github.com/mitsuba-renderer/mitsuba2)
 for additional documentation and instructions on how to compile, use, and extend Mitsuba 2.
 
+### Exporting to an h5 file (uncompressed & compressed)
+
+
+To export a render as an <b>uncompressed</b> h5, uncomment the call to `write_hdf5()` in the function `develop()`, which is in `/src/films/streakhdrfilm.cpp`.
+<br><br>
+To export a render as a <b>compressed</b> h5, uncomment the call to `write_hdf5_compressed()` in the function `develop()`, which is in `/src/films/streakhdrfilm.cpp`.
+<br>
+
+### Exporting to a sparse tensor
+
+First, run `installpytorch.sh` in the root directory to download and unzip LibTorch.
+<br><br>
+To export a render as a sparse tensor, uncomment the call to `write_sparse_tensor()` in the function `develop()`, which is in `/src/films/streakhdrfilm.cpp`.
+
+
 ## License and citation
 
 See the [original repository](https://github.com/mitsuba-renderer/mitsuba2). Additionally, if you are using this code in academic research, we would be grateful if you cited [our publication](https://doi.org/10.1016/j.cag.2022.07.003):
