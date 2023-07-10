@@ -498,6 +498,18 @@ void write_hdf5_compressed() {
         // You may want to change chunk_dims to smaller dimensions if you're only accessing part of a .h5 file
         hsize_t chunk_dims[4] = {dims[0], dims[1], dims[2], dims[3]};
 
+        // ensure each chunk is 2^32 - 1 elements or fewer
+        constexpr hsize_t max_floats_per_chunk = (1ULL << 32);
+
+        hsize_t floats_in_chunk = chunk_dims[0] * chunk_dims[1] * chunk_dims[2] * chunk_dims[3];
+
+        while (floats_in_chunk > max_floats_per_chunk)
+        {
+            // ceiling division
+            chunk_dims[2] = (chunk_dims[2] + 1) / 2;
+            floats_in_chunk = chunk_dims[0] * chunk_dims[1] * chunk_dims[2] * chunk_dims[3];
+        }
+
         hid_t plist = H5Pcreate(H5P_DATASET_CREATE);
         H5Pset_chunk(plist, 4, chunk_dims);
         unsigned int compression_level = 9;
