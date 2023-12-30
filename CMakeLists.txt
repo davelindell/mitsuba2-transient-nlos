@@ -235,7 +235,9 @@ add_subdirectory(ext ext_build)
 # build hdf5
 # find_package(HDF5 REQUIRED COMPONENTS C CXX)
 # link_libraries(${HDF5_C_LIBRARIES} ${HDF5_CXX_LIBRARIES})
-link_directories(${CMAKE_CURRENT_BINARY_DIR}/ext_build/hdf5/bin)
+# link_directories(${CMAKE_CURRENT_BINARY_DIR}/ext_build/hdf5/bin)
+link_directories(/usr/lib/aarch64-linux-gnu/hdf5/serial)
+# link_directories(${CMAKE_CURRENT_BINARY_DIR}/ext_build/hdf5/bin)
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     link_libraries(hdf5_debug)
